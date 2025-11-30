@@ -1,4 +1,5 @@
 from grid_environment import GridWorld
+from a_star import AStar
 
 if __name__ == "__main__":
     dataset_str = """
@@ -20,3 +21,17 @@ if __name__ == "__main__":
     print(f"Tetangga dari Start {grid_world.start}: {neighbors_of_start}")
 
     grid_world.visualize()
+    
+    solver = AStar(grid_world)
+    path, cost, visited = solver.search()
+
+    if path:
+        print("\n[HASIL A* SEARCH]")
+        print(f"Total Langkah (Cost): {cost}")
+        print(f"Total Node Dievaluasi: {visited}")
+        print(f"Rute: {path}")
+        
+        print("\nVisualisasi:")
+        grid_world.visualize(path)
+    else:
+        print("\nTujuan tidak dapat dicapai.")
