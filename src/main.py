@@ -1,5 +1,6 @@
 from grid_environment import GridWorld
 from a_star import AStar
+from bfs import BFS
 import os
 
 def load_dataset(filename):
@@ -18,7 +19,7 @@ def get_dataset_files():
     return sorted(files)
 
 if __name__ == "__main__":
-    # Get all dataset files
+
     dataset_files = get_dataset_files()
 
     if not dataset_files:
@@ -29,7 +30,7 @@ if __name__ == "__main__":
             print(f"Processing: {dataset_file}")
             print('='*60)
 
-            # Load dataset from file
+
             dataset_str = load_dataset(dataset_file)
 
             grid_world = GridWorld(dataset_str)
@@ -42,6 +43,20 @@ if __name__ == "__main__":
             print(f"Tetangga dari Start {grid_world.start}: {neighbors_of_start}")
 
             grid_world.visualize()
+
+            bfs_solver = BFS(grid_world)
+            bfs_path, bfs_cost, bfs_visited = bfs_solver.search()
+
+            if bfs_path:
+                print("\n[HASIL BFS SEARCH]")
+                print(f"Total Langkah (Cost): {bfs_cost}")
+                print(f"Total Node Dievaluasi: {bfs_visited}")
+                print(f"Rute: {bfs_path}")
+                
+                print("\nVisualisasi:")
+                grid_world.visualize(bfs_path)
+            else:
+                print("\nTujuan tidak dapat dicapai oleh BFS.")                                                     
 
             solver = AStar(grid_world)
             path, cost, visited = solver.search()
