@@ -1,37 +1,58 @@
 from grid_environment import GridWorld
 from a_star import AStar
+import os
+
+def load_dataset(filename):
+    """Load dataset from file"""
+    dataset_path = os.path.join(os.path.dirname(__file__), '..', 'datasets', filename)
+    with open(dataset_path, 'r') as f:
+        return f.read()
+
+def get_dataset_files():
+    """Get all dataset files from datasets folder"""
+    dataset_dir = os.path.join(os.path.dirname(__file__), '..', 'datasets')
+    if not os.path.exists(dataset_dir):
+        return []
+
+    files = [f for f in os.listdir(dataset_dir) if f.endswith('.txt') and f != 'README.txt']
+    return sorted(files)
 
 if __name__ == "__main__":
-    dataset_str = """
-    5 5
-    S . . . .
-    . # . # .
-    . # . # .
-    . . . # .
-    G . . . .
-    """
+    # Get all dataset files
+    dataset_files = get_dataset_files()
 
-    grid_world = GridWorld(dataset_str)
-
-    print(f"Ukuran Grid: {grid_world.rows}x{grid_world.cols}")
-    print(f"Start: {grid_world.start}")
-    print(f"Goal: {grid_world.goal}")
-
-    neighbors_of_start = grid_world.get_neighbors(grid_world.start)
-    print(f"Tetangga dari Start {grid_world.start}: {neighbors_of_start}")
-
-    grid_world.visualize()
-    
-    solver = AStar(grid_world)
-    path, cost, visited = solver.search()
-
-    if path:
-        print("\n[HASIL A* SEARCH]")
-        print(f"Total Langkah (Cost): {cost}")
-        print(f"Total Node Dievaluasi: {visited}")
-        print(f"Rute: {path}")
-        
-        print("\nVisualisasi:")
-        grid_world.visualize(path)
+    if not dataset_files:
+        print("No dataset files found in datasets folder.")
     else:
-        print("\nTujuan tidak dapat dicapai.")
+        for dataset_file in dataset_files:
+            print(f"\n{'='*60}")
+            print(f"Processing: {dataset_file}")
+            print('='*60)
+
+            # Load dataset from file
+            dataset_str = load_dataset(dataset_file)
+
+            grid_world = GridWorld(dataset_str)
+
+            print(f"Ukuran Grid: {grid_world.rows}x{grid_world.cols}")
+            print(f"Start: {grid_world.start}")
+            print(f"Goal: {grid_world.goal}")
+
+            neighbors_of_start = grid_world.get_neighbors(grid_world.start)
+            print(f"Tetangga dari Start {grid_world.start}: {neighbors_of_start}")
+
+            grid_world.visualize()
+
+            solver = AStar(grid_world)
+            path, cost, visited = solver.search()
+
+            if path:
+                print("\n[HASIL A* SEARCH]")
+                print(f"Total Langkah (Cost): {cost}")
+                print(f"Total Node Dievaluasi: {visited}")
+                print(f"Rute: {path}")
+
+                print("\nVisualisasi:")
+                grid_world.visualize(path)
+            else:
+                print("\nTujuan tidak dapat dicapai.")
