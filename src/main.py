@@ -1,11 +1,10 @@
 from grid_environment import GridWorld, Colors
-from a_star import AStar
+from a_star import AStarSearch
 from ucs import UniformCostSearch
 from bfs import BreadthFirstSearch
 
 import os
 import time
-
 
 def load_dataset(filename):
     base_path = os.path.dirname(os.path.abspath(__file__))
