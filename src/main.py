@@ -150,12 +150,12 @@ def run_single_algorithm(grid_world, algo_choice, visualize=True):
         solver = UniformCostSearch(grid_world, visualize=visualize, delay=delay)
         algo_name = "UCS"
     elif algo_choice == 3:
-        solver = AStar(
+        solver = AStarSearch(
             grid_world, heuristic_type="manhattan", visualize=visualize, delay=delay
         )
         algo_name = "A* (Manhattan)"
     else:
-        solver = AStar(
+        solver = AStarSearch(
             grid_world, heuristic_type="euclidean", visualize=visualize, delay=delay
         )
         algo_name = "A* (Euclidean)"
@@ -230,7 +230,7 @@ def run_all_algorithms(grid_world):
 
     print(f"\n{Colors.CYAN}[3/4] Running A* (Manhattan Heuristic)...{Colors.RESET}")
     start_time = time.perf_counter()
-    astar_manhattan = AStar(grid_world, heuristic_type="manhattan", visualize=False)
+    astar_manhattan = AStarSearch(grid_world, heuristic_type="manhattan", visualize=False)
     path_m, cost_m, visited_m = astar_manhattan.search()
     end_time = time.perf_counter()
     time_m = (end_time - start_time) * 1000
@@ -255,7 +255,7 @@ def run_all_algorithms(grid_world):
 
     print(f"\n{Colors.CYAN}[4/4] Running A* (Euclidean Heuristic)...{Colors.RESET}")
     start_time = time.perf_counter()
-    astar_euclidean = AStar(grid_world, heuristic_type="euclidean", visualize=False)
+    astar_euclidean = AStarSearch(grid_world, heuristic_type="euclidean", visualize=False)
     path_e, cost_e, visited_e = astar_euclidean.search()
     end_time = time.perf_counter()
     time_e = (end_time - start_time) * 1000
