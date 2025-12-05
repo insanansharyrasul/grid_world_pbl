@@ -1,24 +1,25 @@
 class Colors:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    GRAY = '\033[90m'
-    
-    BG_RED = '\033[101m'
-    BG_GREEN = '\033[102m'
-    BG_YELLOW = '\033[103m'
-    BG_BLUE = '\033[104m'
-    BG_MAGENTA = '\033[105m'
-    BG_CYAN = '\033[106m'
-    BG_WHITE = '\033[107m'
-    BG_GRAY = '\033[100m'
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    MAGENTA = "\033[95m"
+    CYAN = "\033[96m"
+    WHITE = "\033[97m"
+    GRAY = "\033[90m"
+
+    BG_RED = "\033[101m"
+    BG_GREEN = "\033[102m"
+    BG_YELLOW = "\033[103m"
+    BG_BLUE = "\033[104m"
+    BG_MAGENTA = "\033[105m"
+    BG_CYAN = "\033[106m"
+    BG_WHITE = "\033[107m"
+    BG_GRAY = "\033[100m"
+
 
 class GridWorld:
     def __init__(self, input_data):
@@ -27,15 +28,8 @@ class GridWorld:
         self.goal = None
         self.rows = 0
         self.cols = 0
-        
-        self.costs = {
-            '.': 1,
-            '@': 3,
-            '&': 15,
-            '#': float('inf'),
-            'S': 1,
-            'G': 1
-        }
+
+        self.costs = {".": 1, "@": 3, "&": 15, "#": float("inf"), "S": 1, "G": 1}
 
         self._parse_input(input_data)
 
@@ -89,32 +83,51 @@ class GridWorld:
         terrain_type = self.grid[r][c]
         return self.costs.get(terrain_type, 1)
 
-    def visualize(self, path=None, current=None, visited=None, show_stats=False, cost=0, nodes_visited=0):
+    def visualize(
+        self,
+        path=None,
+        current=None,
+        visited=None,
+        show_stats=False,
+        cost=0,
+        nodes_visited=0,
+        clear_screen=True,
+    ):
         import os
-        if os.name == 'nt':
-            os.system('cls')
-        else:
-            os.system('clear')
-            
+
+        if clear_screen:
+            if os.name == "nt":
+                os.system("cls")
+            else:
+                os.system("clear")
+
         display_grid = [row[:] for row in self.grid]
         visited_cells = set(visited) if visited else set()
         path_cells = set(path) if path else set()
 
         print(Colors.CYAN + "=" * 60 + Colors.RESET)
-        
+
         for r, row in enumerate(display_grid):
             colored_row = []
             for c, cell in enumerate(row):
                 pos = (r, c)
-                
+
                 if current and pos == current:
-                    colored_row.append(Colors.BG_YELLOW + Colors.BOLD + " X " + Colors.RESET)
+                    colored_row.append(
+                        Colors.BG_YELLOW + Colors.BOLD + " X " + Colors.RESET
+                    )
                 elif cell == "S":
-                    colored_row.append(Colors.BG_GREEN + Colors.BOLD + " S " + Colors.RESET)
+                    colored_row.append(
+                        Colors.BG_GREEN + Colors.BOLD + " S " + Colors.RESET
+                    )
                 elif cell == "G":
-                    colored_row.append(Colors.BG_BLUE + Colors.BOLD + " G " + Colors.RESET)
+                    colored_row.append(
+                        Colors.BG_BLUE + Colors.BOLD + " G " + Colors.RESET
+                    )
                 elif pos in path_cells:
-                    colored_row.append(Colors.GREEN + Colors.BOLD + " * " + Colors.RESET)
+                    colored_row.append(
+                        Colors.GREEN + Colors.BOLD + " * " + Colors.RESET
+                    )
                 elif cell == "#":
                     colored_row.append(Colors.BG_RED + "   " + Colors.RESET)
                 elif cell == "&":
@@ -134,12 +147,14 @@ class GridWorld:
                         colored_row.append(Colors.WHITE + " . " + Colors.RESET)
                 else:
                     colored_row.append(f" {cell} ")
-            
+
             print("".join(colored_row))
-        
+
         print(Colors.CYAN + "=" * 60 + Colors.RESET)
-        
+
         if show_stats:
             print(f"{Colors.YELLOW}Current Cost: {Colors.BOLD}{cost}{Colors.RESET}")
-            print(f"{Colors.CYAN}Nodes Visited: {Colors.BOLD}{nodes_visited}{Colors.RESET}")
+            print(
+                f"{Colors.CYAN}Nodes Visited: {Colors.BOLD}{nodes_visited}{Colors.RESET}"
+            )
             print(Colors.CYAN + "=" * 60 + Colors.RESET)
