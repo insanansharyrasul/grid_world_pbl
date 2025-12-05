@@ -1,6 +1,7 @@
 from grid_environment import GridWorld
 from a_star import AStar
 from ucs import UniformCostSearch
+from bfs import BreadthFirstSearch
 
 import os
 import time
@@ -65,6 +66,24 @@ if __name__ == "__main__":
             
             print("Peta Awal (Legenda: . = Kering(1), @ = Gembur(3), & = Lumpur(15), # = Tembok)")
             grid_world.visualize()
+            
+            print(f"\n--- Running BFS (Breadth First Search) ---")
+            start_time = time.perf_counter()
+
+            bfs_solver = BreadthFirstSearch(grid_world)
+            path_bfs, cost_bfs, visited_bfs = bfs_solver.search()
+
+            end_time = time.perf_counter()
+            execution_time = (end_time - start_time) * 1000
+
+            if path_bfs:
+                print(f"Status: SUCCESS")
+                print(f"Total Cost: {cost_bfs}")
+                print(f"Nodes Visited: {visited_bfs}")
+                print(f"Time: {execution_time:.4f} ms")
+            else:
+                print("Status: FAILED")
+
 
             path_manhattan = run_experiment(grid_world, 'manhattan', "A* (Manhattan Heuristic)")
 
@@ -92,3 +111,4 @@ if __name__ == "__main__":
                 grid_world.visualize(path_ucs)
             else:
                 print("Status: FAILED")
+
