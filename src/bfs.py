@@ -18,8 +18,6 @@ class BreadthFirstSearch:
         visited_count = 0
         visited = set()
 
-        print(f"[BFS] Memulai pencarian dari {self.start} ke {self.goal}...")
-
         while not queue.is_empty():
             current = queue.pop()
 
@@ -42,7 +40,6 @@ class BreadthFirstSearch:
 
             if current == self.goal:
                 total_cost = cost_so_far[current]
-                print(f"[BFS] Target dicapai! Total Cost: {total_cost}")
                 path = self._reconstruct_path(came_from, current)
                 return path, total_cost, visited_count
 
@@ -53,7 +50,6 @@ class BreadthFirstSearch:
                     came_from[neighbor] = current
                     queue.push(neighbor)
 
-        print("[BFS] Gagal! Tidak ada jalur ditemukan.")
         return None, 0, visited_count
 
     def _reconstruct_path(self, came_from, current):

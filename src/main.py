@@ -51,31 +51,30 @@ def display_algorithm_menu():
     print(Colors.CYAN + "="*60 + Colors.RESET)
 
 def print_comparison_table(results):
-    print("\n" + Colors.CYAN + "="*80 + Colors.RESET)
-    print(Colors.BOLD + Colors.YELLOW + "TABEL PERBANDINGAN ALGORITMA" + Colors.RESET)
-    print(Colors.CYAN + "="*80 + Colors.RESET)
+    print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*80}{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.YELLOW}TABEL PERBANDINGAN ALGORITMA{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.CYAN}{'='*80}{Colors.RESET}")
     
-    print(f"{Colors.BOLD}{'Algoritma':<25} {'Status':<10} {'Cost':<12} {'Visited':<12} {'Time (ms)':<12}{Colors.RESET}")
-    print(Colors.GRAY + "-"*80 + Colors.RESET)
+    print(f"\n{Colors.BOLD}{'Algoritma':<20} {'Status':<12} {'Cost':<10} {'Nodes':<10} {'Time (ms)':<15}{Colors.RESET}")
+    print(f"{Colors.CYAN}{'-'*80}{Colors.RESET}")
     
     for result in results:
         algo = result['algo']
-        status = result['status']
         
         if result['status'] == 'SUCCESS':
-            status_colored = Colors.GREEN + status + Colors.RESET
-            cost = f"{Colors.YELLOW}{result['cost']:.2f}{Colors.RESET}"
-            visited = f"{Colors.CYAN}{result['visited']}{Colors.RESET}"
-            time_ms = f"{Colors.MAGENTA}{result['time']:.4f}{Colors.RESET}"
+            status = f"{Colors.GREEN}{result['status']:<12}{Colors.RESET}"
+            cost = f"{Colors.YELLOW}{result['cost']:<10.2f}{Colors.RESET}"
+            visited = f"{Colors.CYAN}{result['visited']:<10}{Colors.RESET}"
+            time_ms = f"{Colors.MAGENTA}{result['time']:<15.4f}{Colors.RESET}"
         else:
-            status_colored = Colors.RED + status + Colors.RESET
-            cost = f"{Colors.GRAY}-{Colors.RESET}"
-            visited = f"{Colors.GRAY}-{Colors.RESET}"
-            time_ms = f"{Colors.GRAY}-{Colors.RESET}"
+            status = f"{Colors.RED}{result['status']:<12}{Colors.RESET}"
+            cost = f"{Colors.GRAY}{'-':<10}{Colors.RESET}"
+            visited = f"{Colors.GRAY}{'-':<10}{Colors.RESET}"
+            time_ms = f"{Colors.GRAY}{'-':<15}{Colors.RESET}"
         
-        print(f"{algo:<25} {status_colored:<20} {cost:<22} {visited:<22} {time_ms:<22}")
+        print(f"{algo:<20} {status} {cost} {visited} {time_ms}")
     
-    print(Colors.CYAN + "="*80 + Colors.RESET)
+    print(f"{Colors.CYAN}{'='*80}{Colors.RESET}")
 
 def print_result_summary(algo_name, path, cost, visited, execution_time):
     print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*60}{Colors.RESET}")
@@ -89,6 +88,9 @@ def print_result_summary(algo_name, path, cost, visited, execution_time):
         print(f"{Colors.BOLD}Path Length:{Colors.RESET} {Colors.MAGENTA}{len(path)} langkah{Colors.RESET}")
         print(f"{Colors.BOLD}Execution Time:{Colors.RESET} {Colors.MAGENTA}{execution_time:.4f} ms{Colors.RESET}")
         
+        nodes_per_ms = visited / execution_time if execution_time > 0 else 0
+        print(f"{Colors.BOLD}Throughput:{Colors.RESET} {Colors.CYAN}{nodes_per_ms:.2f} nodes/ms{Colors.RESET}")
+        
         print(f"\n{Colors.BOLD}Jalur yang Ditemukan:{Colors.RESET}")
         path_str = " -> ".join([f"({r},{c})" for r, c in path])
         print(f"{Colors.GREEN}{path_str}{Colors.RESET}")
@@ -97,7 +99,7 @@ def print_result_summary(algo_name, path, cost, visited, execution_time):
         print(f"Path ({algo_name}, cost={cost}): {path_str}")
         
         print(f"\n{Colors.BOLD}Ringkasan:{Colors.RESET}")
-        print(f"{algo_name}: {visited} node, cost {cost}")
+        print(f"{algo_name}: {visited} node, cost {cost}, {execution_time:.4f} ms")
     else:
         print(f"\n{Colors.BOLD}Status:{Colors.RESET} {Colors.RED}FAILED - Tidak ada jalur!{Colors.RESET}")
         print(f"{Colors.BOLD}Nodes Visited:{Colors.RESET} {Colors.CYAN}{visited}{Colors.RESET}")
@@ -137,88 +139,163 @@ def run_single_algorithm(grid_world, algo_choice, visualize=True):
 def run_all_algorithms(grid_world):
     results = []
     
-    print(f"\n{Colors.CYAN}Running BFS (Breadth First Search)...{Colors.RESET}")
+    print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*60}{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.YELLOW}MENJALANKAN SEMUA ALGORITMA{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.CYAN}{'='*60}{Colors.RESET}\n")
+    
+    print(f"{Colors.CYAN}[1/4] Running BFS (Breadth First Search)...{Colors.RESET}")
     start_time = time.perf_counter()
     bfs_solver = BreadthFirstSearch(grid_world, visualize=False)
     path_bfs, cost_bfs, visited_bfs = bfs_solver.search()
     end_time = time.perf_counter()
+    time_bfs = (end_time - start_time) * 1000
+    
+    if path_bfs:
+        print(f"{Colors.GREEN}✓ BFS: {visited_bfs} nodes, cost {cost_bfs}, {time_bfs:.4f} ms{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}✗ BFS: No path found{Colors.RESET}")
     
     results.append({
         'algo': 'BFS',
         'status': 'SUCCESS' if path_bfs else 'FAILED',
         'cost': cost_bfs if path_bfs else 0,
         'visited': visited_bfs,
-        'time': (end_time - start_time) * 1000,
+        'time': time_bfs,
         'path': path_bfs
     })
     
-    print(f"{Colors.CYAN}Running UCS (Uniform Cost Search)...{Colors.RESET}")
+    print(f"\n{Colors.CYAN}[2/4] Running UCS (Uniform Cost Search)...{Colors.RESET}")
     start_time = time.perf_counter()
     ucs_solver = UniformCostSearch(grid_world, visualize=False)
     path_ucs, cost_ucs, visited_ucs = ucs_solver.search()
     end_time = time.perf_counter()
+    time_ucs = (end_time - start_time) * 1000
+    
+    if path_ucs:
+        print(f"{Colors.GREEN}✓ UCS: {visited_ucs} nodes, cost {cost_ucs}, {time_ucs:.4f} ms{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}✗ UCS: No path found{Colors.RESET}")
     
     results.append({
         'algo': 'UCS',
         'status': 'SUCCESS' if path_ucs else 'FAILED',
         'cost': cost_ucs if path_ucs else 0,
         'visited': visited_ucs,
-        'time': (end_time - start_time) * 1000,
+        'time': time_ucs,
         'path': path_ucs
     })
     
-    print(f"{Colors.CYAN}Running A* (Manhattan Heuristic)...{Colors.RESET}")
+    print(f"\n{Colors.CYAN}[3/4] Running A* (Manhattan Heuristic)...{Colors.RESET}")
     start_time = time.perf_counter()
     astar_manhattan = AStar(grid_world, heuristic_type='manhattan', visualize=False)
     path_m, cost_m, visited_m = astar_manhattan.search()
     end_time = time.perf_counter()
+    time_m = (end_time - start_time) * 1000
+    
+    if path_m:
+        print(f"{Colors.GREEN}✓ A* (Manhattan): {visited_m} nodes, cost {cost_m}, {time_m:.4f} ms{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}✗ A* (Manhattan): No path found{Colors.RESET}")
     
     results.append({
         'algo': 'A* (Manhattan)',
         'status': 'SUCCESS' if path_m else 'FAILED',
         'cost': cost_m if path_m else 0,
         'visited': visited_m,
-        'time': (end_time - start_time) * 1000,
+        'time': time_m,
         'path': path_m
     })
     
-    print(f"{Colors.CYAN}Running A* (Euclidean Heuristic)...{Colors.RESET}")
+    print(f"\n{Colors.CYAN}[4/4] Running A* (Euclidean Heuristic)...{Colors.RESET}")
     start_time = time.perf_counter()
     astar_euclidean = AStar(grid_world, heuristic_type='euclidean', visualize=False)
     path_e, cost_e, visited_e = astar_euclidean.search()
     end_time = time.perf_counter()
+    time_e = (end_time - start_time) * 1000
+    
+    if path_e:
+        print(f"{Colors.GREEN}✓ A* (Euclidean): {visited_e} nodes, cost {cost_e}, {time_e:.4f} ms{Colors.RESET}")
+    else:
+        print(f"{Colors.RED}✗ A* (Euclidean): No path found{Colors.RESET}")
     
     results.append({
         'algo': 'A* (Euclidean)',
         'status': 'SUCCESS' if path_e else 'FAILED',
         'cost': cost_e if path_e else 0,
         'visited': visited_e,
-        'time': (end_time - start_time) * 1000,
+        'time': time_e,
         'path': path_e
     })
     
     print_comparison_table(results)
     
-    print(f"{Colors.BOLD}{Colors.GREEN}RINGKASAN HASIL PERBANDINGAN:{Colors.RESET}")
-    for result in results:
-        if result['status'] == 'SUCCESS':
-            print(f"{result['algo']}: {result['visited']} node, cost {result['cost']}")
-        else:
-            print(f"{result['algo']}: {Colors.RED}No path found{Colors.RESET}")
+    print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*80}{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.GREEN}ANALISIS PERFORMA ALGORITMA{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.CYAN}{'='*80}{Colors.RESET}")
     
-    best_algo = min([r for r in results if r['status'] == 'SUCCESS'], 
-                    key=lambda x: (x['cost'], x['visited']), default=None)
+    successful_results = [r for r in results if r['status'] == 'SUCCESS']
     
-    if best_algo:
-        print(f"\n{Colors.BOLD}{Colors.GREEN}Algoritma Terbaik (Cost Terendah):{Colors.RESET} {Colors.YELLOW}{best_algo['algo']}{Colors.RESET}")
-        print(f"  Cost: {Colors.YELLOW}{best_algo['cost']}{Colors.RESET}")
-        print(f"  Nodes: {Colors.CYAN}{best_algo['visited']}{Colors.RESET}")
-        print(f"  Time: {Colors.MAGENTA}{best_algo['time']:.4f} ms{Colors.RESET}")
+    if successful_results:
+        print(f"\n{Colors.BOLD}1. ANALISIS WAKTU EKSEKUSI:{Colors.RESET}")
+        fastest = min(successful_results, key=lambda x: x['time'])
+        slowest = max(successful_results, key=lambda x: x['time'])
+        avg_time = sum(r['time'] for r in successful_results) / len(successful_results)
         
-        if best_algo['path']:
-            path_str = " -> ".join([f"({r},{c})" for r, c in best_algo['path']])
-            print(f"\n{Colors.BOLD}Path ({best_algo['algo']}, cost={best_algo['cost']}):{Colors.RESET}")
+        print(f"   {Colors.GREEN}Tercepat:{Colors.RESET} {Colors.YELLOW}{fastest['algo']}{Colors.RESET} - {Colors.MAGENTA}{fastest['time']:.4f} ms{Colors.RESET}")
+        print(f"   {Colors.RED}Terlambat:{Colors.RESET} {Colors.YELLOW}{slowest['algo']}{Colors.RESET} - {Colors.MAGENTA}{slowest['time']:.4f} ms{Colors.RESET}")
+        print(f"   {Colors.CYAN}Rata-rata:{Colors.RESET} {Colors.MAGENTA}{avg_time:.4f} ms{Colors.RESET}")
+        
+        if slowest['time'] > 0:
+            speedup = slowest['time'] / fastest['time']
+            print(f"   {Colors.BOLD}Speedup:{Colors.RESET} {fastest['algo']} {Colors.GREEN}{speedup:.2f}x lebih cepat{Colors.RESET} dari {slowest['algo']}")
+        
+        print(f"\n{Colors.BOLD}2. ANALISIS EFISIENSI NODE:{Colors.RESET}")
+        most_efficient = min(successful_results, key=lambda x: x['visited'])
+        least_efficient = max(successful_results, key=lambda x: x['visited'])
+        avg_nodes = sum(r['visited'] for r in successful_results) / len(successful_results)
+        
+        print(f"   {Colors.GREEN}Paling Efisien:{Colors.RESET} {Colors.YELLOW}{most_efficient['algo']}{Colors.RESET} - {Colors.CYAN}{most_efficient['visited']} nodes{Colors.RESET}")
+        print(f"   {Colors.RED}Kurang Efisien:{Colors.RESET} {Colors.YELLOW}{least_efficient['algo']}{Colors.RESET} - {Colors.CYAN}{least_efficient['visited']} nodes{Colors.RESET}")
+        print(f"   {Colors.CYAN}Rata-rata:{Colors.RESET} {Colors.CYAN}{avg_nodes:.1f} nodes{Colors.RESET}")
+        
+        if least_efficient['visited'] > 0:
+            efficiency_ratio = (least_efficient['visited'] - most_efficient['visited']) / least_efficient['visited'] * 100
+            print(f"   {Colors.BOLD}Efisiensi:{Colors.RESET} {most_efficient['algo']} mengeksplorasi {Colors.GREEN}{efficiency_ratio:.1f}% lebih sedikit{Colors.RESET} node")
+        
+        print(f"\n{Colors.BOLD}3. ANALISIS OPTIMALITY (COST):{Colors.RESET}")
+        best_cost = min(successful_results, key=lambda x: x['cost'])
+        worst_cost = max(successful_results, key=lambda x: x['cost'])
+        
+        print(f"   {Colors.GREEN}Cost Terendah:{Colors.RESET} {Colors.YELLOW}{best_cost['algo']}{Colors.RESET} - {Colors.YELLOW}{best_cost['cost']}{Colors.RESET}")
+        print(f"   {Colors.RED}Cost Tertinggi:{Colors.RESET} {Colors.YELLOW}{worst_cost['algo']}{Colors.RESET} - {Colors.YELLOW}{worst_cost['cost']}{Colors.RESET}")
+        
+        optimal_algos = [r['algo'] for r in successful_results if r['cost'] == best_cost['cost']]
+        if len(optimal_algos) > 1:
+            print(f"   {Colors.CYAN}Algoritma Optimal:{Colors.RESET} {', '.join(optimal_algos)} (semua menemukan path optimal)")
+        
+        print(f"\n{Colors.BOLD}4. RINGKASAN HASIL:{Colors.RESET}")
+        for result in results:
+            if result['status'] == 'SUCCESS':
+                print(f"   {result['algo']}: {result['visited']} node, cost {result['cost']}, {result['time']:.4f} ms")
+            else:
+                print(f"   {result['algo']}: {Colors.RED}No path found{Colors.RESET}")
+        
+        print(f"\n{Colors.BOLD}{Colors.GREEN}ALGORITMA TERBAIK:{Colors.RESET}")
+        
+        best_overall = min(successful_results, key=lambda x: (x['cost'], x['visited'], x['time']))
+        print(f"   {Colors.YELLOW}{best_overall['algo']}{Colors.RESET}")
+        print(f"   └─ Cost: {Colors.YELLOW}{best_overall['cost']}{Colors.RESET}")
+        print(f"   └─ Nodes: {Colors.CYAN}{best_overall['visited']}{Colors.RESET}")
+        print(f"   └─ Time: {Colors.MAGENTA}{best_overall['time']:.4f} ms{Colors.RESET}")
+        
+        if best_overall['path']:
+            path_str = " -> ".join([f"({r},{c})" for r, c in best_overall['path']])
+            print(f"\n{Colors.BOLD}Path ({best_overall['algo']}, cost={best_overall['cost']}):{Colors.RESET}")
             print(f"{Colors.GREEN}{path_str}{Colors.RESET}")
+    else:
+        print(f"\n{Colors.RED}Tidak ada algoritma yang berhasil menemukan jalur!{Colors.RESET}")
+    
+    print(f"{Colors.CYAN}{'='*80}{Colors.RESET}\n")
     
     return results
 
@@ -289,16 +366,20 @@ if __name__ == "__main__":
                         continue
                     
                     if algo_choice == 5:
+                        print(f"\n{Colors.BOLD}{Colors.YELLOW}Menjalankan semua algoritma...{Colors.RESET}\n")
                         results = run_all_algorithms(grid_world)
+                        
                         best_result = None
                         for result in results:
-                            if result['status'] == 'SUCCESS' and 'A*' in result['algo']:
-                                best_result = result
-                                break
+                            if result['status'] == 'SUCCESS':
+                                if best_result is None or result['cost'] < best_result['cost']:
+                                    best_result = result
                         
                         if best_result and best_result['path']:
-                            print(f"\n{Colors.BOLD}Visualisasi Jalur ({best_result['algo']}):{Colors.RESET}")
+                            print(f"\n{Colors.BOLD}{Colors.GREEN}Visualisasi Jalur Terbaik ({best_result['algo']}):{Colors.RESET}")
                             grid_world.visualize(best_result['path'])
+                        else:
+                            print(f"\n{Colors.RED}Tidak ada jalur yang ditemukan oleh algoritma manapun!{Colors.RESET}")
                     else:
                         visualize = input(f"\n{Colors.YELLOW}Aktifkan visualisasi step-by-step? (y/n): {Colors.RESET}").strip().lower() == 'y'
                         run_single_algorithm(grid_world, algo_choice, visualize=visualize)
