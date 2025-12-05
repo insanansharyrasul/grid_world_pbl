@@ -77,6 +77,34 @@ def print_comparison_table(results):
     
     print(Colors.CYAN + "="*80 + Colors.RESET)
 
+def print_result_summary(algo_name, path, cost, visited, execution_time):
+    print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*60}{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.GREEN}RINGKASAN HASIL - {algo_name}{Colors.RESET}")
+    print(f"{Colors.BOLD}{Colors.CYAN}{'='*60}{Colors.RESET}")
+    
+    if path:
+        print(f"\n{Colors.BOLD}Status:{Colors.RESET} {Colors.GREEN}SUCCESS - Jalur ditemukan!{Colors.RESET}")
+        print(f"{Colors.BOLD}Total Cost:{Colors.RESET} {Colors.YELLOW}{cost}{Colors.RESET}")
+        print(f"{Colors.BOLD}Nodes Visited:{Colors.RESET} {Colors.CYAN}{visited}{Colors.RESET}")
+        print(f"{Colors.BOLD}Path Length:{Colors.RESET} {Colors.MAGENTA}{len(path)} langkah{Colors.RESET}")
+        print(f"{Colors.BOLD}Execution Time:{Colors.RESET} {Colors.MAGENTA}{execution_time:.4f} ms{Colors.RESET}")
+        
+        print(f"\n{Colors.BOLD}Jalur yang Ditemukan:{Colors.RESET}")
+        path_str = " -> ".join([f"({r},{c})" for r, c in path])
+        print(f"{Colors.GREEN}{path_str}{Colors.RESET}")
+        
+        print(f"\n{Colors.BOLD}Format Output Standar:{Colors.RESET}")
+        print(f"Path ({algo_name}, cost={cost}): {path_str}")
+        
+        print(f"\n{Colors.BOLD}Ringkasan:{Colors.RESET}")
+        print(f"{algo_name}: {visited} node, cost {cost}")
+    else:
+        print(f"\n{Colors.BOLD}Status:{Colors.RESET} {Colors.RED}FAILED - Tidak ada jalur!{Colors.RESET}")
+        print(f"{Colors.BOLD}Nodes Visited:{Colors.RESET} {Colors.CYAN}{visited}{Colors.RESET}")
+        print(f"{Colors.BOLD}Execution Time:{Colors.RESET} {Colors.MAGENTA}{execution_time:.4f} ms{Colors.RESET}")
+    
+    print(f"{Colors.CYAN}{'='*60}{Colors.RESET}\n")
+
 def run_single_algorithm(grid_world, algo_choice, visualize=True):
     delay = 0.3
     
@@ -100,17 +128,11 @@ def run_single_algorithm(grid_world, algo_choice, visualize=True):
     end_time = time.perf_counter()
     execution_time = (end_time - start_time) * 1000
     
+    print_result_summary(algo_name, path, cost, visited, execution_time)
+    
     if path:
-        print(f"\n{Colors.BOLD}{Colors.GREEN}Hasil {algo_name}:{Colors.RESET}")
-        print(f"Status: {Colors.GREEN}SUCCESS{Colors.RESET}")
-        print(f"Total Cost: {Colors.YELLOW}{cost}{Colors.RESET}")
-        print(f"Nodes Visited: {Colors.CYAN}{visited}{Colors.RESET}")
-        print(f"Time: {Colors.MAGENTA}{execution_time:.4f} ms{Colors.RESET}")
-        
-        print(f"\n{Colors.BOLD}Visualisasi Jalur Final:{Colors.RESET}")
+        print(f"{Colors.BOLD}Visualisasi Jalur Final:{Colors.RESET}")
         grid_world.visualize(path=path)
-    else:
-        print(f"\n{Colors.RED}Status: FAILED (No Path){Colors.RESET}")
 
 def run_all_algorithms(grid_world):
     results = []
@@ -176,6 +198,27 @@ def run_all_algorithms(grid_world):
     })
     
     print_comparison_table(results)
+    
+    print(f"{Colors.BOLD}{Colors.GREEN}RINGKASAN HASIL PERBANDINGAN:{Colors.RESET}")
+    for result in results:
+        if result['status'] == 'SUCCESS':
+            print(f"{result['algo']}: {result['visited']} node, cost {result['cost']}")
+        else:
+            print(f"{result['algo']}: {Colors.RED}No path found{Colors.RESET}")
+    
+    best_algo = min([r for r in results if r['status'] == 'SUCCESS'], 
+                    key=lambda x: (x['cost'], x['visited']), default=None)
+    
+    if best_algo:
+        print(f"\n{Colors.BOLD}{Colors.GREEN}Algoritma Terbaik (Cost Terendah):{Colors.RESET} {Colors.YELLOW}{best_algo['algo']}{Colors.RESET}")
+        print(f"  Cost: {Colors.YELLOW}{best_algo['cost']}{Colors.RESET}")
+        print(f"  Nodes: {Colors.CYAN}{best_algo['visited']}{Colors.RESET}")
+        print(f"  Time: {Colors.MAGENTA}{best_algo['time']:.4f} ms{Colors.RESET}")
+        
+        if best_algo['path']:
+            path_str = " -> ".join([f"({r},{c})" for r, c in best_algo['path']])
+            print(f"\n{Colors.BOLD}Path ({best_algo['algo']}, cost={best_algo['cost']}):{Colors.RESET}")
+            print(f"{Colors.GREEN}{path_str}{Colors.RESET}")
     
     return results
 
