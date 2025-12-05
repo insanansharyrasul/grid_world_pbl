@@ -1,3 +1,25 @@
+class Colors:
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+    
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    GRAY = '\033[90m'
+    
+    BG_RED = '\033[101m'
+    BG_GREEN = '\033[102m'
+    BG_YELLOW = '\033[103m'
+    BG_BLUE = '\033[104m'
+    BG_MAGENTA = '\033[105m'
+    BG_CYAN = '\033[106m'
+    BG_WHITE = '\033[107m'
+    BG_GRAY = '\033[100m'
+
 class GridWorld:
     def __init__(self, input_data):
         self.grid = []
@@ -6,12 +28,6 @@ class GridWorld:
         self.rows = 0
         self.cols = 0
         
-        # Definisi Biaya Medan (Terrain Costs)
-        # . = Tanah Kering (Ideal) -> Cost 1
-        # @ = Tanah Gembur (Sedang) -> Cost 3
-        # & = Lumpur (Berat) -> Cost 15
-        # # = Obstacle (Tembok) -> Cost Infinity
-        # S/G = Start/Goal -> Cost 1 (Asumsi start/goal di tanah kering)
         self.costs = {
             '.': 1,
             '@': 3,
@@ -28,7 +44,6 @@ class GridWorld:
 
         start_index = 0
 
-        # Cek apakah baris pertama adalah dimensi (misal: "10 10")
         header_parts = lines[0].split()
         if len(header_parts) == 2 and header_parts[0].isdigit():
             start_index = 1
@@ -36,7 +51,6 @@ class GridWorld:
         raw_grid = lines[start_index:]
 
         for r, line in enumerate(raw_grid):
-            # Handle input yang dipisah spasi atau tidak
             row_chars = line.split()
             if len(row_chars) == 1 and len(row_chars[0]) > 1:
                 row_chars = list(row_chars[0])
@@ -54,9 +68,6 @@ class GridWorld:
         self.cols = len(self.grid[0] if self.rows > 0 else 0)
 
     def get_neighbors(self, node):
-        """
-        Mengembalikan tetangga yang valid (tidak keluar peta dan bukan tembok).
-        """
         r, c = node
         neighbors = []
         # Arah pergerakan: Atas, Bawah, Kiri, Kanan (4-Connectivity)
@@ -65,7 +76,6 @@ class GridWorld:
         for dr, dc in directions:
             nr, nc = r + dr, c + dc
 
-            # Cek batas grid
             if 0 <= nr < self.rows and 0 <= nc < self.cols:
                 # Cek apakah obstacle (#)
                 # Catatan: Lumpur (&) dan Gembur (@) ADALAH walkable (bisa dilewati)
@@ -75,28 +85,61 @@ class GridWorld:
         return neighbors
 
     def get_cost(self, from_node, to_node):
-        """
-        Mengembalikan biaya bergerak ke node tujuan berdasarkan tipe tanahnya.
-        """
         r, c = to_node
         terrain_type = self.grid[r][c]
-        
-        # Ambil cost dari dictionary, default ke 1 jika tidak dikenal
         return self.costs.get(terrain_type, 1)
 
-    def visualize(self, path=None):
-        print("-" * 60)
-        # Buat copy grid untuk visualisasi
+    def visualize(self, path=None, current=None, visited=None, show_stats=False, cost=0, nodes_visited=0):
+        import os
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+            
         display_grid = [row[:] for row in self.grid]
+        visited_cells = set(visited) if visited else set()
+        path_cells = set(path) if path else set()
 
-        if path:
-            for r, c in path:
-                if display_grid[r][c] not in ("S", "G"):
-                    # Tandai jalur dengan '*'
-                    display_grid[r][c] = "*"
-
-        for row in display_grid:
-            # Print row dengan spasi antar karakter agar rapi
-            print(" ".join(row))
-
-        print("-" * 60)
+        print(Colors.CYAN + "=" * 60 + Colors.RESET)
+        
+        for r, row in enumerate(display_grid):
+            colored_row = []
+            for c, cell in enumerate(row):
+                pos = (r, c)
+                
+                if current and pos == current:
+                    colored_row.append(Colors.BG_YELLOW + Colors.BOLD + " X " + Colors.RESET)
+                elif cell == "S":
+                    colored_row.append(Colors.BG_GREEN + Colors.BOLD + " S " + Colors.RESET)
+                elif cell == "G":
+                    colored_row.append(Colors.BG_BLUE + Colors.BOLD + " G " + Colors.RESET)
+                elif pos in path_cells:
+                    colored_row.append(Colors.GREEN + Colors.BOLD + " * " + Colors.RESET)
+                elif cell == "#":
+                    colored_row.append(Colors.BG_RED + "   " + Colors.RESET)
+                elif cell == "&":
+                    if pos in visited_cells:
+                        colored_row.append(Colors.BG_MAGENTA + " & " + Colors.RESET)
+                    else:
+                        colored_row.append(Colors.MAGENTA + " & " + Colors.RESET)
+                elif cell == "@":
+                    if pos in visited_cells:
+                        colored_row.append(Colors.BG_YELLOW + " @ " + Colors.RESET)
+                    else:
+                        colored_row.append(Colors.YELLOW + " @ " + Colors.RESET)
+                elif cell == ".":
+                    if pos in visited_cells:
+                        colored_row.append(Colors.GRAY + " . " + Colors.RESET)
+                    else:
+                        colored_row.append(Colors.WHITE + " . " + Colors.RESET)
+                else:
+                    colored_row.append(f" {cell} ")
+            
+            print("".join(colored_row))
+        
+        print(Colors.CYAN + "=" * 60 + Colors.RESET)
+        
+        if show_stats:
+            print(f"{Colors.YELLOW}Current Cost: {Colors.BOLD}{cost}{Colors.RESET}")
+            print(f"{Colors.CYAN}Nodes Visited: {Colors.BOLD}{nodes_visited}{Colors.RESET}")
+            print(Colors.CYAN + "=" * 60 + Colors.RESET)

@@ -1,12 +1,15 @@
-import heapq
+from utils import MinHeap
 import math
+import time
 
 class AStar:
-    def __init__(self, grid_world, heuristic_type='manhattan'):
+    def __init__(self, grid_world, heuristic_type='manhattan', visualize=False, delay=0.1):
         self.grid = grid_world
         self.start = grid_world.start
         self.goal = grid_world.goal
         self.heuristic_type = heuristic_type
+        self.visualize_mode = visualize
+        self.delay = delay
 
     def heuristic(self, a, b):
         x1, y1 = a
@@ -24,25 +27,36 @@ class AStar:
             return 0
 
     def search(self):
-        open_set = []
-        heapq.heappush(open_set, (0, 0, self.start))
+        open_set = MinHeap()
+        
+        h_start = self.heuristic(self.start, self.goal)
+        open_set.push(h_start, (0, self.start))
         
         came_from = {self.start: None}
-        
         g_score = {self.start: 0}
-        
         visited_nodes = set()
-        
         visited_count = 0
 
-        while open_set:
-            current_f, current_g, current = heapq.heappop(open_set)
+        while not open_set.is_empty():
+            current_f, (current_g, current) = open_set.pop()
 
             if current in visited_nodes:
                 continue
 
             visited_nodes.add(current)
             visited_count += 1
+
+            if self.visualize_mode:
+                path_so_far = self._reconstruct_path(came_from, current)
+                self.grid.visualize(
+                    path=path_so_far,
+                    current=current,
+                    visited=visited_nodes,
+                    show_stats=True,
+                    cost=g_score[current],
+                    nodes_visited=visited_count
+                )
+                time.sleep(self.delay)
 
             if current == self.goal:
                 path = self._reconstruct_path(came_from, current)
@@ -51,15 +65,13 @@ class AStar:
             neighbors = self.grid.get_neighbors(current)
             for neighbor in neighbors:
                 movement_cost = self.grid.get_cost(current, neighbor)
-                
                 tentative_g = g_score[current] + movement_cost
 
                 if neighbor not in g_score or tentative_g < g_score[neighbor]:
                     g_score[neighbor] = tentative_g
                     h = self.heuristic(neighbor, self.goal)
                     f = tentative_g + h
-                    
-                    heapq.heappush(open_set, (f, tentative_g, neighbor))
+                    open_set.push(f, (tentative_g, neighbor))
                     came_from[neighbor] = current
 
         return None, 0, visited_count
