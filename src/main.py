@@ -1,5 +1,7 @@
 from grid_environment import GridWorld
 from a_star import AStar
+from ucs import UniformCostSearch
+
 import os
 import time
 
@@ -71,3 +73,22 @@ if __name__ == "__main__":
             if path_euclidean:
                 print("\nVisualisasi Jalur (A* Euclidean):")
                 grid_world.visualize(path_euclidean)
+                
+            print(f"\n--- Running UCS (Uniform Cost Search) ---")
+            start_time = time.perf_counter()
+            
+            ucs_solver = UniformCostSearch(grid_world)
+            path_ucs, cost_ucs, visited_ucs = ucs_solver.search()
+            
+            end_time = time.perf_counter()
+            execution_time = (end_time - start_time) * 1000
+
+            if path_ucs:
+                print(f"Status: SUCCESS")
+                print(f"Total Cost: {cost_ucs}")
+                print(f"Nodes Visited: {visited_ucs}")
+                print(f"Time: {execution_time:.4f} ms")
+                # print("Visualisasi Jalur UCS:")
+                # grid_world.visualize(path_ucs)
+            else:
+                print("Status: FAILED")
