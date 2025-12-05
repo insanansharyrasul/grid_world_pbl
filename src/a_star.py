@@ -1,8 +1,7 @@
 from utils import MinHeap
-import math
 import time
 
-class AStar:
+class AStarSearch:
     def __init__(self, grid_world, heuristic_type='manhattan', visualize=False, delay=0.1):
         self.grid = grid_world
         self.start = grid_world.start
@@ -20,7 +19,7 @@ class AStar:
         if self.heuristic_type == 'manhattan':
             return dx + dy
         elif self.heuristic_type == 'euclidean':
-            return math.sqrt(dx**2 + dy**2)
+            return (dx**2 + dy**2) ** 0.5
         elif self.heuristic_type == 'chebyshev':
             return max(dx, dy)
         else:
