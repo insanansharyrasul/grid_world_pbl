@@ -107,8 +107,8 @@ if __name__ == "__main__":
                 print(f"Total Cost: {cost_ucs}")
                 print(f"Nodes Visited: {visited_ucs}")
                 print(f"Time: {execution_time:.4f} ms")
-                # print("Visualisasi Jalur UCS:")
-                # grid_world.visualize(path_ucs)
+                print("Visualisasi Jalur UCS:")
+                grid_world.visualize(path_ucs)
             else:
                 print("Status: FAILED")
 
